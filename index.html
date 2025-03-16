@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bottle Challenge Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #4a6baf;
+            text-align: center;
+        }
+        
+        .description {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .player {
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        #player1 {
+            background-color: #e6f2ff;
+            border-color: #2196f3;
+        }
+        
+        #player2 {
+            background-color: #fff4e6;
+            border-color: #ff5722;
+        }
+        
+        h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+        
+        .status {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .energy-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .energy-fill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 100%;
+            transition: width 0.5s;
+        }
+        
+        .bottles-container {
+            display: flex;
+            height: 100px;
+            position: relative;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .bottle {
+            width: 20px;
+            height: 40px;
+            background-color: #8bc34a;
+            border-radius: 2px 2px 5px 5px;
+            position: absolute;
+            bottom: 10px;
+            transition: left 0.5s, opacity 0.5s;
+        }
+        
+        .bottle::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 2px;
+            width: 16px;
+            height: 8px;
+            background-color: #689f38;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .bottle-number {
+            position: absolute;
+            top: -20px;
+            left: 7px;
+            font-size: 10px;
+            color: #444;
+        }
+        
+        .crate {
+            width: 120px;
+            height: 50px;
+            background-color: #795548;
+            position: absolute;
+            bottom: 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 5px;
+        }
+        
+        .crate-hole {
+            width: 8px;
+            height: 20px;
+            background-color: #5d4037;
+            border-radius: 0 0 4px 4px;
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        .crate-bottle {
+            width: 8px;
+            height: 25px;
+            background-color: #8bc34a;
+            border-radius: 2px 2px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            display: none;
+        }
+        
+        .player-icon {
+            width: 30px;
+            height: 50px;
+            border-radius: 15px 15px 0 0;
+            position: absolute;
+            bottom: 10px;
+            transition: left 0.5s;
+        }
+        
+        #player1-icon {
+            background-color: #2196f3;
+        }
+        
+        #player2-icon {
+            background-color: #ff5722;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .results h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.2s, background-color 0.3s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #start-button {
+            background-color: #4a6baf;
+        }
+        
+        #start-button:hover {
+            background-color: #3f5c96;
+        }
+        
+        #refresh-button {
+            background-color: #f57c00;
+        }
+        
+        #refresh-button:hover {
+            background-color: #e65100;
+        }
+        
+        .timer-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .individual-timer {
+            font-size: 18px;
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #player1-timer {
+            color: #1565c0;
+            background-color: #e3f2fd;
+        }
+        
+        #player2-timer {
+            color: #d84315;
+            background-color: #fff3e0;
+        }
+        
+        .finished {
+            font-weight: bold;
+            color: #4caf50;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .cost-indicator {
+            position: absolute;
+            top: -25px;
+            font-size: 10px;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .bottles-container {
+                height: 80px;
+            }
+            
+            .bottle {
+                width: 15px;
+                height: 30px;
+            }
+            
+            .bottle::before {
+                width: 12px;
+                top: -6px;
+                left: 1.5px;
+                height: 6px;
+            }
+            
+            .crate {
+                width: 100px;
+                height: 40px;
+            }
+            
+            .crate-hole {
+                width: 6px;
+                height: 15px;
+                margin-top: 25px;
+            }
+            
+            .timer-container {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>The Bottle Challenge!</h1>
+        
+        <div class="description">
+            <p>Two players need to collect 10 bottles. Who will finish first?</p>
+            <p><strong>Blue Player</strong>: Starts with easy bottles (closest)</p>
+            <p><strong>Orange Player</strong>: Starts with hard bottles (farthest)</p>
+        </div>
+        
+        <div class="button-container">
+            <button id="start-button">Start Game</button>
+            <button id="refresh-button">Play Again</button>
+        </div>
+        
+        <div class="timer-container">
+            <div class="individual-timer" id="player1-timer">Blue: 00:00</div>
+            <div class="individual-timer" id="player2-timer">Orange: 00:00</div>
+        </div>
+        
+        <div class="game-area">
+            <div class="player" id="player1">
+                <h2>Blue Player (Easy First)</h2>
+                <div class="status">
+                    <div>Bottles: <span id="player1-bottles">0</span>/10</div>
+                    <div>Energy: <span id="player1-energy">100</span>/100</div>
+                </div>
+                <div class="energy-bar">
+                    <div class="energy-fill" id="player1-energy-fill"></div>
+                </div>
+                <div class="bottles-container" id="player1-area">
+                    <div class="crate" style="left: 0;" id="player1-crate">
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-1"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-2"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-3"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-4"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-5"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-6"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-7"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-8"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-9"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player1-crate-bottle-10"></div>
+                        </div>
+                    </div>
+                    <div class="player-icon" id="player1-icon" style="left: 150px;"></div>
+                </div>
+            </div>
+            
+            <div class="player" id="player2">
+                <h2>Orange Player (Hard First)</h2>
+                <div class="status">
+                    <div>Bottles: <span id="player2-bottles">0</span>/10</div>
+                    <div>Energy: <span id="player2-energy">100</span>/100</div>
+                </div>
+                <div class="energy-bar">
+                    <div class="energy-fill" id="player2-energy-fill"></div>
+                </div>
+                <div class="bottles-container" id="player2-area">
+                    <div class="crate" style="left: 0;" id="player2-crate">
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-1"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-2"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-3"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-4"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-5"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-6"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-7"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-8"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-9"></div>
+                        </div>
+                        <div class="crate-hole">
+                            <div class="crate-bottle" id="player2-crate-bottle-10"></div>
+                        </div>
+                    </div>
+                    <div class="player-icon" id="player2-icon" style="left: 150px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results" id="results">
+            <h3>Game Results</h3>
+            <p id="results-text"></p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game state
+            let player1Bottles = 0;
+            let player2Bottles = 0;
+            let player1Energy = 100;
+            let player2Energy = 100;
+            let gameRunning = false;
+            let startTime;
+            let player1FinishTime = 0;
+            let player2FinishTime = 0;
+            let timerInterval;
+            
+            // Sound effects
+            const walkSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            const pickupSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            const placeSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            const finishSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            const startSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            
+            // Create sounds programmatically
+            function createOscillator(freq, type, duration, delay = 0) {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.value = freq;
+                gainNode.gain.value = 0.2;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                setTimeout(() => {
+                    oscillator.start();
+                    setTimeout(() => {
+                        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
+                        setTimeout(() => {
+                            oscillator.stop();
+                        }, 100);
+                    }, duration);
+                }, delay);
+            }
+            
+            // Define sound functions
+            function playWalkSound() {
+                createOscillator(220, 'sine', 100);
+            }
+            
+            function playPickupSound() {
+                createOscillator(660, 'sine', 100);
+            }
+            
+            function playPlaceSound() {
+                createOscillator(440, 'sine', 100);
+            }
+            
+            function playFinishSound() {
+                createOscillator(523.25, 'sine', 200, 0);
+                createOscillator(659.25, 'sine', 200, 200);
+                createOscillator(783.99, 'sine', 300, 400);
+            }
+            
+            function playStartSound() {
+                createOscillator(392, 'sine', 200, 0);
+                createOscillator(523.25, 'sine', 200, 200);
+            }
+            
+            // DOM elements
+            const startButton = document.getElementById('start-button');
+            const refreshButton = document.getElementById('refresh-button');
+            const player1BottlesElement = document.getElementById('player1-bottles');
+            const player2BottlesElement = document.getElementById('player2-bottles');
+            const player1EnergyElement = document.getElementById('player1-energy');
+            const player2EnergyElement = document.getElementById('player2-energy');
+            const player1EnergyFill = document.getElementById('player1-energy-fill');
+            const player2EnergyFill = document.getElementById('player2-energy-fill');
+            const player1Icon = document.getElementById('player1-icon');
+            const player2Icon = document.getElementById('player2-icon');
+            const player1Area = document.getElementById('player1-area');
+            const player2Area = document.getElementById('player2-area');
+            const resultsDiv = document.getElementById('results');
+            const resultsText = document.getElementById('results-text');
+            const player1TimerElement = document.getElementById('player1-timer');
+            const player2TimerElement = document.getElementById('player2-timer');
+            
+            // Energy costs per bottle position
+            const energyCosts = [
+                // First 3 bottles (1-3)
+                1,    // Bottle 1 (closest)
+                3,    // Bottle 2
+                6,    // Bottle 3
+                
+                // Middle 3 bottles (4-6)
+                8,    // Bottle 4
+                12,   // Bottle 5
+                20,   // Bottle 6
+                
+                // Last 4 bottles (7-10)
+                15,   // Bottle 7 
+                15,   // Bottle 8
+                10,   // Bottle 9
+                10    // Bottle 10 (farthest)
+            ];
+            
+            // Additional energy cost for Player 1
+            const player1AdditionalCost = [
+                0,    // Bottle 1
+                0,    // Bottle 2
+                0,    // Bottle 3
+                0,    // Bottle 4
+                0,    // Bottle 5
+                0,    // Bottle 6
+                5,    // Bottle 7 - gets tired!
+                10,   // Bottle 8 - gets more tired!
+                15,   // Bottle 9 - even more tired!
+                20    // Bottle 10 - super tired!
+            ];
+            
+            // Time multipliers based on distance
+            const timeMultipliers = [
+                1.0,  // Bottle 1 (closest)
+                1.1,  // Bottle 2
+                1.2,  // Bottle 3
+                1.4,  // Bottle 4
+                1.6,  // Bottle 5
+                1.8,  // Bottle 6
+                2.0,  // Bottle 7
+                2.2,  // Bottle 8
+                2.4,  // Bottle 9
+                2.6   // Bottle 10 (farthest)
+            ];
+            
+            // Reset game state
+            function resetGame() {
+                player1Bottles = 0;
+                player2Bottles = 0;
+                player1Energy = 100;
+                player2Energy = 100;
+                player1FinishTime = 0;
+                player2FinishTime = 0;
+                
+                player1BottlesElement.textContent = '0';
+                player2BottlesElement.textContent = '0';
+                player1EnergyElement.textContent = '100';
+                player2EnergyElement.textContent = '100';
+                player1EnergyFill.style.width = '100%';
+                player2EnergyFill.style.width = '100%';
+                
+                player1Icon.style.left = '150px';
+                player2Icon.style.left = '150px';
+                
+                player1TimerElement.textContent = 'Blue: 00:00';
+                player2TimerElement.textContent = 'Orange: 00:00';
+                
+                // Reset crate bottles
+                for (let i = 1; i <= 10; i++) {
+                    document.getElementById(`player1-crate-bottle-${i}`).style.display = 'none';
+                    document.getElementById(`player2-crate-bottle-${i}`).style.display = 'none';
+                }
+                
+                // Clear any existing bottles
+                const existingBottles = document.querySelectorAll('.bottle:not(.crate-bottle)');
+                existingBottles.forEach(bottle => bottle.remove());
+                
+                // Place bottles in both areas with the same numbering (1 through 10)
+                for (let i = 0; i < 10; i++) {
+                    // Distance from crate increases with bottle number
+                    const bottlePosition = 150 + (i+1) * 35;
+                    
+                    // Create bottles for player 1
+                    const bottle1 = document.createElement('div');
+                    bottle1.className = 'bottle player1-bottle';
+                    bottle1.id = `player1-bottle-${i+1}`;
+                    bottle1.style.left = `${bottlePosition}px`;
+                    
+                    // Add bottle number label
+                    const label1 = document.createElement('div');
+                    label1.className = 'bottle-number';
+                    label1.textContent = i+1;
+                    bottle1.appendChild(label1);
+                    
+                    player1Area.appendChild(bottle1);
+                    
+                    // Create identical bottles for player 2
+                    const bottle2 = document.createElement('div');
+                    bottle2.className = 'bottle player2-bottle';
+                    bottle2.id = `player2-bottle-${i+1}`;
+                    bottle2.style.left = `${bottlePosition}px`;
+                    
+                    // Add bottle number label
+                    const label2 = document.createElement('div');
+                    label2.className = 'bottle-number';
+                    label2.textContent = i+1;
+                    bottle2.appendChild(label2);
+                    
+                    player2Area.appendChild(bottle2);
+                }
+                
+                resultsDiv.style.display = 'none';
+                startButton.disabled = false;
+                refreshButton.disabled = true;
+            }
+            
+            // Format time as mm:ss
+            function formatTime(milliseconds) {
+                const totalSeconds = Math.floor(milliseconds / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Start the timer
+            function startTimer() {
+                startTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const currentTime = Date.now() - startTime;
+                    
+                    // Update player 1 timer if not finished
+                    if (player1FinishTime === 0) {
+                        player1TimerElement.textContent = `Blue: ${formatTime(currentTime)}`;
+                    }
+                    
+                    // Update player 2 timer if not finished
+                    if (player2FinishTime === 0) {
+                        player2TimerElement.textContent = `Orange: ${formatTime(currentTime)}`;
+                    }
+                }, 100);
+            }
+            
+            // Stop the timer
+            function stopTimer() {
+                clearInterval(timerInterval);
+            }
+            
+            // Get the current time in the simulation
+            function getCurrentTime() {
+                return Date.now() - startTime;
+            }
+            
+            // Simulate player 1 collecting bottles (closest to farthest: 1→10)
+            async function player1Move() {
+                if (player1Bottles >= 10 || !gameRunning) return;
+                
+                const bottleNumber = player1Bottles + 1; // Next bottle to collect (1→10)
+                const bottle = document.getElementById(`player1-bottle-${bottleNumber}`);
+                const bottlePosition = 150 + bottleNumber * 35;
+                const timeMultiplier = timeMultipliers[bottleNumber - 1];
+                
+                // Move player to bottle (takes longer for farther bottles)
+                player1Icon.style.left = `${bottlePosition}px`;
+                playWalkSound();
+                
+                // Wait for animation with time multiplier
+                await new Promise(resolve => setTimeout(resolve, 300 * timeMultiplier));
+                
+                // Calculate energy cost with additional cost for later bottles
+                const energyCost = energyCosts[bottleNumber - 1] + player1AdditionalCost[bottleNumber - 1];
+                
+                // Check if player has enough energy
+                if (player1Energy < energyCost) {
+                    // Player doesn't have enough energy
+                    checkGameEnd();
+                    return;
+                }
+                
+                // Update energy
+                player1Energy -= energyCost;
+                player1Energy = Math.max(0, player1Energy); // Ensure energy doesn't go negative
+                player1EnergyElement.textContent = Math.round(player1Energy);
+                player1EnergyFill.style.width = `${(player1Energy/100) * 100}%`;
+                
+                // Pick up bottle (hide it)
+                bottle.style.opacity = '0';
+                playPickupSound();
+                
+                // Wait for animation
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Move player back to crate (takes longer for farther bottles)
+                player1Icon.style.left = '50px';
+                playWalkSound();
+                
+                // Wait for animation with time multiplier
+                await new Promise(resolve => setTimeout(resolve, 300 * timeMultiplier));
+                
+                // Place bottle in crate
+                const crateBottle = document.getElementById(`player1-crate-bottle-${bottleNumber}`);
+                crateBottle.style.display = 'block';
+                playPlaceSound();
+                
+                // Add bottle to count
+                player1Bottles++;
+                player1BottlesElement.textContent = player1Bottles;
+                
+                // Check if player has completed all bottles
+                if (player1Bottles >= 10) {
+                    player1FinishTime = getCurrentTime();
+                    player1TimerElement.innerHTML = `Blue: ${formatTime(player1FinishTime)} <span class="finished">DONE!</span>`;
+                    playFinishSound();
+                    checkGameEnd();
+                    return;
+                }
+                
+                // Continue if game is still running
+                if (gameRunning && player1Energy > 0) {
+                    player1Move();
+                } else {
+                    checkGameEnd();
+                }
+            }
+            
+            // Simulate player 2 collecting bottles (farthest to closest: 10→1)
+            async function player2Move() {
+                if (player2Bottles >= 10 || !gameRunning) return;
+                
+                const bottleToCollect = 10 - player2Bottles; // Next bottle to collect (10→1)
+                const bottle = document.getElementById(`player2-bottle-${bottleToCollect}`);
+                const bottlePosition = 150 + bottleToCollect * 35;
+                const timeMultiplier = timeMultipliers[bottleToCollect - 1];
+                
+                // Move player to bottle (takes longer for farther bottles)
+                player2Icon.style.left = `${bottlePosition}px`;
+                playWalkSound();
+                
+                // Wait for animation with time multiplier
+                await new Promise(resolve => setTimeout(resolve, 300 * timeMultiplier));
+                
+                // Calculate energy cost (no additional cost for player 2)
+                const energyCost = energyCosts[bottleToCollect - 1];
+                
+                // Check if player has enough energy
+                if (player2Energy < energyCost) {
+                    // Player doesn't have enough energy
+                    checkGameEnd();
+                    return;
+                }
+                
+                // Update energy
+                player2Energy -= energyCost;
+                player2Energy = Math.max(0, player2Energy); // Ensure energy doesn't go negative
+                player2EnergyElement.textContent = Math.round(player2Energy);
+                player2EnergyFill.style.width = `${(player2Energy/100) * 100}%`;
+                
+                // Pick up bottle (hide it)
+                bottle.style.opacity = '0';
+                playPickupSound();
+                
+                // Wait for animation
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Move player back to crate (takes longer for farther bottles)
+                player2Icon.style.left = '50px';
+                playWalkSound();
+                
+                // Wait for animation with time multiplier
+                await new Promise(resolve => setTimeout(resolve, 300 * timeMultiplier));
+                
+                // Place bottle in crate - since we're going from 10→1, add in reverse order
+                const bottlesPlaced = player2Bottles + 1;
+                const crateBottle = document.getElementById(`player2-crate-bottle-${bottlesPlaced}`);
+                crateBottle.style.display = 'block';
+                playPlaceSound();
+                
+                // Add bottle to count
+                player2Bottles++;
+                player2BottlesElement.textContent = player2Bottles;
+                
+                // Check if player has completed all bottles
+                if (player2Bottles >= 10) {
+                    player2FinishTime = getCurrentTime();
+                    player2TimerElement.innerHTML = `Orange: ${formatTime(player2FinishTime)} <span class="finished">DONE!</span>`;
+                    playFinishSound();
+                    checkGameEnd();
+                    return;
+                }
+                
+                // Continue if game is still running
+                if (gameRunning && player2Energy > 0) {
+                    player2Move();
+                } else {
+                    checkGameEnd();
+                }
+            }
+            
+            // Check if game has ended
+            function checkGameEnd() {
+                if (!gameRunning) return;
+                
+                const player1Done = player1Bottles >= 10 || player1Energy < (energyCosts[player1Bottles] + player1AdditionalCost[player1Bottles]);
+                const player2Done = player2Bottles >= 10 || player2Energy < energyCosts[9 - player2Bottles];
+                
+                if (player1Done && player2Done) {
+                    gameEnd();
+                }
+            }
+            
+            // End the game
+            function gameEnd() {
+                gameRunning = false;
+                stopTimer();
+                startButton.disabled = true;
+                refreshButton.disabled = false;
+                
+                let resultMessage = "<strong>Game Over!</strong><br><br>";
+                
+                if (player1Bottles >= 10 && player2Bottles >= 10) {
+                    const player1Time = formatTime(player1FinishTime);
+                    const player2Time = formatTime(player2FinishTime);
+                    const timeDifference = Math.abs(player1FinishTime - player2FinishTime) / 1000;
+                    
+                    if (player1FinishTime < player2FinishTime) {
+                        resultMessage += `Blue finished in ${player1Time}<br>`;
+                        resultMessage += `Orange finished in ${player2Time}<br>`;
+                        resultMessage += `Blue was faster by ${timeDifference.toFixed(1)} seconds.<br>`;
+                    } else {
+                        resultMessage += `Orange finished in ${player2Time}<br>`;
+                        resultMessage += `Blue finished in ${player1Time}<br>`;
+                        resultMessage += `Orange was faster by ${timeDifference.toFixed(1)} seconds.<br>`;
+                    }
+                } else if (player1Bottles >= 10) {
+                    resultMessage += `Blue collected all bottles!<br>`;
+                    resultMessage += `Orange got ${player2Bottles} bottles and ran out of energy.<br>`;
+                } else if (player2Bottles >= 10) {
+                    resultMessage += `Orange collected all bottles!<br>`;
+                    resultMessage += `Blue got ${player1Bottles} bottles and ran out of energy.<br>`;
+                } else {
+                    resultMessage += `Both players ran out of energy!<br>`;
+                    resultMessage += `Blue: ${player1Bottles} bottles<br>`;
+                    resultMessage += `Orange: ${player2Bottles} bottles<br>`;
+                }
+                
+                if (player2FinishTime < player1FinishTime || (player2Bottles >= 10 && player1Bottles < 10)) {
+                    resultMessage += "<br><strong>Orange player won by doing the hard work first!</strong>";
+                    resultMessage += "<br>Lesson: Do the hardest jobs when you have the most energy.";
+                } else if (player1FinishTime < player2FinishTime || (player1Bottles >= 10 && player2Bottles < 10)) {
+                    resultMessage += "<br><strong>Blue player won by starting with easy tasks!</strong>";
+                }
+                
+                resultsText.innerHTML = resultMessage;
+                resultsDiv.style.display = 'block';
+            }
+            
+            // Start button click handler
+            startButton.addEventListener('click', function() {
+                resetGame();
+                gameRunning = true;
+                startButton.disabled = true;
+                refreshButton.disabled = false;
+                startTimer();
+                playStartSound();
+                
+                // Start both players' movements with a slight delay
+                setTimeout(() => {
+                    if (gameRunning) {
+                        player1Move();
+                        player2Move();
+                    }
+                }, 500);
+            });
+            
+            // Refresh button click handler
+            refreshButton.addEventListener('click', function() {
+                resetGame();
+            });
+            
+            // Initialize game
+            resetGame();
+        });
+    </script>
+</body>
+</html>
